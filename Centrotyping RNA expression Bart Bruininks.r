@@ -1,5 +1,5 @@
 # (c) Bart Bruininks written in the [R] language
-# 29-12-2012 	09.20u-17.00u
+# 02-03-2012 	10.15u-16.00u
 # Computational biology 
 # Research opdracht "centrotyping RNA expression"
 
@@ -262,6 +262,48 @@ cc = Significant(aa)
 ################################################
 ## Creëer een cetrotype m.b.v. de langste rij ##
 ################################################
+source("http://bioconductor.org/biocLite.R")			# Inlezen van packages
+biocLite("limma")
+require("limma")
+
+setwd("C:\\Users\\Students\\Desktop\\Hoofdmap")			# Hoofdlocatie en mappen inlezen
+all_genes <- dir("chr1/")
+all_rawCentrotypes <- dir("rawCentrotypes/")
+
+## Voorbeeld met één gen ##
+# Inlezen van een rawCentrotype en omzetten naar een lijst
+
+
+read <- function(x){
+  filein <- file(paste("rawCentrotypes/", all_rawCentrotypes[x], sep= ""), "rt") #rt zorgt ervoor dat ik mijn file open laat staan terwijl ik hem lees
+  nline <- readLines(filein, n=1,)
+  s <- proc.time()
+  splitit <- NULL
+  namez <- NULL
+  cnt <- 1
+  while(length(nline)){
+    elementen <- strsplit(nline, " ")
+    splitit <- c(splitit, elementen)
+	splitit[[cnt]] <- splitit[[cnt]][-c(1)]
+	namez <- c(namez, elementen[[1]][1])
+	nline <- readLines(filein, n=1)
+	cnt <- cnt+1
+  }
+  e <- proc.time()
+  cat(e[3]-s[3], "seconds\n")
+  close(filein)
+  names(splitit) <- paste("p", namez, sep="")
+  invisible(splitit)
+}
+#lengte van de langste cor. probe met als x de gewenste lijst met cor. probes
+enkelemaxprobelength = function(x){
+	c(names(which.max(unlist(lapply(x, length )))), max(unlist(lapply(x, length )))) 
+}
+
+maxprobelength = function(x){
+	aa = read(x)
+	enkelemaxprobelength(aa)
+}
 
 
 

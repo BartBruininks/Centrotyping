@@ -266,16 +266,13 @@ source("http://bioconductor.org/biocLite.R")			# Inlezen van packages
 biocLite("limma")
 require("limma")
 
-setwd("C:\\Users\\Students\\Desktop\\Hoofdmap")			# Hoofdlocatie en mappen inlezen
+setwd("C:\\Users\\Bart\\Desktop\\Leren Programmeren\\Centrotype")			# Hoofdlocatie en mappen inlezen
 all_genes <- dir("chr1/")
 all_rawCentrotypes <- dir("rawCentrotypes/")
 
-## Voorbeeld met één gen ##
 # Inlezen van een rawCentrotype en omzetten naar een lijst
-
-
 read <- function(x){
-  filein <- file(paste("rawCentrotypes/", all_rawCentrotypes[x], sep= ""), "rt") #rt zorgt ervoor dat ik mijn file open laat staan terwijl ik hem lees
+  filein <- file(paste(x, all_rawCentrotypes[x], sep= ""), "rt") #rt zorgt ervoor dat ik mijn file open laat staan terwijl ik hem lees
   nline <- readLines(filein, n=1,)
   s <- proc.time()
   splitit <- NULL
@@ -295,18 +292,38 @@ read <- function(x){
   names(splitit) <- paste("p", namez, sep="")
   invisible(splitit)
 }
-#lengte van de langste cor. probe met als x de gewenste lijst met cor. probes
-enkelemaxprobelength = function(x){
-	c(names(which.max(unlist(lapply(x, length )))), max(unlist(lapply(x, length )))) 
+#lengte van de langste cor. probe met als aa de gewenste lijst met cor. probes
+enkelemaxprobelength = function(x,aa){
+	tempgene <- strsplit(all_rawCentrotypes[x], split="[.]")
+	gene <- tempgene[[1]][1]
+	ncorrelatedprobes <- max(unlist(lapply(aa, length )))
+	mostcorr <- names(which.max(unlist(lapply(aa, length ))))
+	return(c(gene,mostcorr,ncorrelatedprobes))
 }
 
-maxprobelength = function(x){
-	aa = read(x)
-	enkelemaxprobelength(aa)
+maxprobelength <- function(x){
+	aa <- read(x)
+	output <- enkelemaxprobelength(x,aa)
+	output
+}
+# Voor alle genen de lengte van de langste cor. probe 
+allmaxprobelength <- function(x = "rawCentrotypes/"){
+	all_rawCentrotypes <- dir(x)
+	lijst <- NULL
+	for(ele in 1:length(all_rawCentrotypes)){
+		temp <- maxprobelength(ele)
+		lijst <- c(lijst, temp)
+		ele <- ele+1
+	}	
+	lijst
 }
 
-
-
+# Een matrix met de probes die met de meeste andere probes correleren binnen één gen
+#### Tussenstation ####
+matrixCentrotypes <- function(x = "rawCentrotypes/"){
+	matrix(allmaxprobelength(x), ncol=(3), nrow=length(all_rawCentrotypes), byrow=TRUE)
+}
+#### Tussenstation ####
 
 
  

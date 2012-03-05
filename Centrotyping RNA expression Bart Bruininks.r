@@ -7,7 +7,7 @@ setwd("C:/Users/Bart/Desktop/Leren Programmeren/Centrotype")
 
 #Data analyse Chr 1
 AT1G01010 = read.table("chr1/AT1G01010.txt")
-dAT1G01010 = AT1G01010[,-c(1:16)] 					# alleen de meetwaarden van AT1G01010
+dAT1G01010 = AT1G01010[,-c(1:16)] 												# alleen de meetwaarden van AT1G01010
 dAT1G01010
 image(t(dAT1G01010))
 
@@ -110,7 +110,8 @@ cor.probe.lijst = vector("list",length(meancor))
 mynames <- NULL
 x = 1
 while(x <= length(meancor)){
-	cor.probe = which((abs(cor(t(ncleanAT1G01010)))[x,]) >= (meancor+abs(sdcor)))			#Kijken met welke hij cor. 
+	cor.probe = which(abs(cor(t(ncleanAT1G01010)))[x,] >= (meancor+abs(sdcor)) 
+	& which(abs(cor(t(ncleanAT1G01010)))[x,] >= 0.6)										#Kijken met welke hij cor. 
 	cor.probe.lijst[[x]] = names(cor.probe)
 	mynames <- c(mynames, names(meancor[x]))
 	x = x+1
@@ -122,23 +123,10 @@ cat("",file="t.txt")
 for(mlist in cor.probe.lijst){
   cat(mlist,"\n",file="t.txt",append=TRUE)
 }
-#####################
-# Lijst weer ophalen#
-#####################
-myfile <- file("t.txt")
-mylist <- vector("list",0)
-mline <- readLines(myfile,n=1)
-while(mline){
-  elem <- strsplit(mline,"\t")
-  mylist <- c(mylist,elem)
-  mline <- readLines(myfile,n=1)
-}
-close(myfile)
-mylist
 
-######################################################
-##	Kijken of het te veralgemenizeren is	(GELUKT)##
-######################################################
+###################################################################################
+##	Kijken of het te veralgemenizeren is  (GELUKT)  ## BEGIN VAN DATA ANALYSE    ##
+###################################################################################
 source("http://bioconductor.org/biocLite.R")
 biocLite("limma")
 require("limma")
@@ -153,14 +141,12 @@ cleancor <- function(a){
     return(a)
 }
 
-u=1
 for(u in 1:length(all_files)){
-# Simpel idee voor latere algemenisering
-	rawX = read.table(paste("chr1/",all_files[u], sep = ""))										#Data inlezen
+	rawX = read.table(paste("chr1/",all_files[u], sep = ""))												#Data inlezen
 	if(nrow(rawX) >= 2){
-		dX = rawX[,-c(1:16)]														#Bijgevoegde informatie weghalen
+		dX = rawX[,-c(1:16)]																				#Bijgevoegde informatie weghalen
 		cleanX = dX[,-c(128, 130, 131, 132, 133, 134, 135, 137, 138, 139, 141, 142, 143, 144, 145)]			#Lijpe individuen weghalen
-		ncleanX = normalizeQuantiles(cleanX)										#Genormalizeerde data
+		ncleanX = normalizeQuantiles(cleanX)																#Genormalizeerde data
 		
 		#Make sure there are no traits which show no variance !!!! this will propagate NA's
 		variances <- apply(ncleanX,1,var)
@@ -169,15 +155,15 @@ for(u in 1:length(all_files)){
 			abscormatrix <- abs(cor(t(ncleanX),use="pair"))
 			(cat(u, "\n"))
 			abscormatrix <- cleancor(abscormatrix)
-# Een probe is gecorreleerd als de gegeven correlatie hoger is dan de mean+(2*sd)		#Eerste these
+# Een probe is gecorreleerd als de gegeven correlatie hoger is dan de mean+(2*sd)							#Eerste these
 			meancor = mean(apply(abscormatrix,2,mean, na.rm = TRUE))										#Vaststellen gemiddelde cor.
-			sdcor   = mean(apply(abscormatrix,2,sd, na.rm = TRUE))										#Vaststellen sd cor.
+			sdcor   = mean(apply(abscormatrix,2,sd, na.rm = TRUE))											#Vaststellen sd cor.
 
 # Een lijst aanmaken met de lengte van mijn hoeveelheid probes per gen
 			cor.probe.lijst = vector("list",ncol(abscormatrix))
 			x = 1
 			while(x <= ncol(abscormatrix)){
-				cor.probe = which(abscormatrix[x,] >= (meancor+(2*sdcor)))				#Kijken met welke hij cor. 
+				cor.probe = which(abscormatrix[x,] >= (meancor+(2*sdcor)) & abscormatrix[x,] >= 0.6)		#Kijken met welke hij cor. met minimale cor. == 0.6  
 				cor.probe.lijst[[x]] = c(rownames(ncleanX)[x],names(cor.probe))
 				x = x+1
 				names(cor.probe.lijst) <- rownames(ncleanX)
@@ -190,7 +176,6 @@ for(u in 1:length(all_files)){
 			}	
 		}
 	}
-	u <- u+1
 }
 
 #### Nomgaals quality control ####
@@ -234,8 +219,8 @@ Significant = function(x){
 }
 
 ######## Run BQC en Significant met 2000 #########
-aa = BQC(10000)
-cc = Significant(aa)
+#aa = BQC(10000)
+#cc = Significant(aa)
 
 # uitkomsten zijn: (10000 random rows)
 #        V128         V133         V134         V135         V137         V139 
@@ -243,18 +228,16 @@ cc = Significant(aa)
 #        V141         V143         V144         V145   gem.         gem. sd.               
 #141.00000000 143.00000000 144.00000000 145.00000000   0.74049332   0.08308256
 
-#Deze individuen zitten allemaal in batch 4. Batch 4 heb ik helemaal verwijdert! 
+#!!!Deze individuen zitten allemaal in batch 4. Batch 4 heb ik helemaal verwijdert!!!! 
 
 #####################################################################################
 ## Probes controleren of ze niet vaker dan één keer binden op het DNA m.b.v. BLAST ##
 #####################################################################################
 	setwd("C:/Users/Bart/Desktop/Leren Programmeren/Centrotype")
 	all_files <- dir("chr1/")
-	u <- 1
 	for(u in 1:length(all_files)){
 		rawX <- read.table(paste("chr1/",all_files[u], sep = ""))
 		probeX <- rawX[,-c(1:4, 7:196)]
-		probeX
 		write.table(probeX, file = paste("sequentie_probes", all_files[u], sep=""))
 	}
 
@@ -262,11 +245,11 @@ cc = Significant(aa)
 ################################################
 ## Creëer een cetrotype m.b.v. de langste rij ##
 ################################################
-source("http://bioconductor.org/biocLite.R")			# Inlezen van packages
+source("http://bioconductor.org/biocLite.R")									# Inlezen van packages
 biocLite("limma")
 require("limma")
 
-setwd("C:\\Users\\Bart\\Desktop\\Leren Programmeren\\Centrotype")			# Hoofdlocatie en mappen inlezen
+setwd("C:\\Users\\Bart\\Desktop\\Leren Programmeren\\Centrotype")				# Hoofdlocatie en mappen inlezen
 all_genes <- dir("chr1/")
 all_rawCentrotypes <- dir("rawCentrotypes/")
 
@@ -306,6 +289,7 @@ maxprobelength <- function(x){
 	output <- enkelemaxprobelength(x,aa)
 	output
 }
+
 # Voor alle genen de lengte van de langste cor. probe 
 allmaxprobelength <- function(x = "rawCentrotypes/"){
 	all_rawCentrotypes <- dir(x)
@@ -313,17 +297,45 @@ allmaxprobelength <- function(x = "rawCentrotypes/"){
 	for(ele in 1:length(all_rawCentrotypes)){
 		temp <- maxprobelength(ele)
 		lijst <- c(lijst, temp)
-		ele <- ele+1
 	}	
 	lijst
 }
 
-# Een matrix met de probes die met de meeste andere probes correleren binnen één gen
+# Een matrix met de probes die met de meeste andere probes correleren binnen één gen,
+# !!!Nog toe te voegen is de gemiddelde expressie van de individuën, iets met de baseparen en de richting!!! 
+
 #### Tussenstation ####
 matrixCentrotypes <- function(x = "rawCentrotypes/"){
 	matrix(allmaxprobelength(x), ncol=(3), nrow=length(all_rawCentrotypes), byrow=TRUE)
 }
 #### Tussenstation ####
+
+#Centrotypes checken door naar de gemmiddelde expressie te kijken per gen, 
+#hoge expressie is een gen dat aanstaat en waar ik dus een centrotype voor zou moeten kunnen maken.
+
+# locatie <- directory of data, ffile <- first file, lfile <- last file)
+meanexpression <- function(locatie = "chr1/", ffile = 1, lfile = 7606){
+	all_files <- dir(locatie)
+	output <- NULL
+	for(ele in ffile:lfile){
+		X <- read.table(paste(locatie, all_files[ele], sep=""))
+		dX <- X[,-c(1:16)]														#Bijgevoegde informatie weghalen
+		cleanX <- dX[,-c(128, 130, 131, 132, 133, 134, 135, 137, 138, 139, 141, 142, 143, 144, 145)]
+		meanrow <- rowMeans(cleanX)
+		meanmean <- mean(meanrow)
+		cat(meanmean, "\n")
+		output <- c(output, meanmean)
+	}
+	output
+}
+
+
+
+
+
+
+		
+
 
 
  

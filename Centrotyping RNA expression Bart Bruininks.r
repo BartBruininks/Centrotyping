@@ -251,11 +251,11 @@ require("limma")
 
 setwd("C:\\Users\\Bart\\Desktop\\Leren Programmeren\\Centrotype")				# Hoofdlocatie en mappen inlezen
 all_genes <- dir("chr1/")
-all_rawCentrotypes <- dir("rawCentrotypes/")
+all_rawCentrotypes <- dir("cor0.6/")
 
 # Inlezen van een rawCentrotype en omzetten naar een lijst
-read <- function(x){
-  filein <- file(paste(x, all_rawCentrotypes[x], sep= ""), "rt") #rt zorgt ervoor dat ik mijn file open laat staan terwijl ik hem lees
+read <- function(x, y = "cor0.6/"){
+  filein <- file(paste(y, all_rawCentrotypes[x], sep=""), "rt") #rt zorgt ervoor dat ik mijn file open laat staan terwijl ik hem lees
   nline <- readLines(filein, n=1,)
   s <- proc.time()
   splitit <- NULL
@@ -328,6 +328,8 @@ meanexpression <- function(locatie = "chr1/", ffile = 1, lfile = 7606){
 	}
 	output
 }
+
+
 
 
 

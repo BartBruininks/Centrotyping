@@ -46,26 +46,45 @@ Centrotype <- function(myrange = c(1 : length(dir("chr1/")))){
 		rawdata <- read.table(paste("chr1/",dir("chr1/")[x],sep=""))
 		#rawdata <- getAdjustedProbes(x)
 		probes <- rawdata[,  rownames(newgenomatrix)]
-		mm <- NULL
-		for(p in 1:nrow(probes)){
-			pvals <- NULL
-			for(ele in 1:ncol(newgenomatrix)){
-			 pvals <- c(pvals, anova(lm(unlist(probes[p,]) ~ newgenomatrix[,ele]))[[5]][1])
-			}
-			mm <- rbind(mm, pvals)
-		}
-    name = strsplit(dir("chr1/")[x], "[.]")[[1]][1]
-		#jpeg(filename = paste("regulatie", name, ".jpeg", sep=""), width = 1000, height = 1000, bg = "white", units = "px")
-    heatmap(apply(-log10(mm) > 3.5,2,as.numeric),col=c("white","black"))
-    #dev.off()
-		cat(name, paste(" Took:", (proc.time()-TijdA)[3], "seconds", sep=" "), "\n")
-    res[[cnt]] <- mm
+    if(nrow(probes) >= 2){
+      mm <- NULL
+      for(p in 1:nrow(probes)){
+        pvals <- NULL
+        for(ele in 1:ncol(newgenomatrix)){
+         pvals <- c(pvals, anova(lm(unlist(probes[p,]) ~ newgenomatrix[,ele]))[[5]][1])
+        }
+        mm <- rbind(mm, pvals)
+      }
+      name = strsplit(dir("chr1/")[x], "[.]")[[1]][1]
+      #jpeg(filename = paste("regulatie", name, ".jpeg", sep=""), width = 1000, height = 1000, bg = "white", units = "px")
+      heatmap(apply(-log10(mm) > 3.5,2,as.numeric),col=c("white","black"))
+      #dev.off()
+      cat(name, paste(" Took:", (proc.time()-TijdA)[3], "seconds", sep=" "), "\n")
+      res[[cnt]]$name <- x
+      res[[cnt]]$mmatrix <- mm
+      res[[cnt]]$ok <- ok_function(mm)
+    }
     cnt <- cnt + 1
 	}
 	invisible(res)
 }
 
-name = strsplit(dir("chr/1"[x]), "[.]")
+ok_function <- function(m){
+  any(apply(apply(-log10(m) > 3.5,2,as.numeric),2,sum) >= 3) 
+}
+
+ unlist(lapply(aa,"[","name"))
+
+# Krijg deze manier van een kolom uitrekenen en in een lijst zetten in de functie van Centrotype #
+rij <- 1:20 
+lijst <- NULL
+matr <- matrix(rij, ncol=10, nrow=2)
+for(x in 1:ncol(matr)){
+  if(sum(matr[,x]) >= 15){
+    lijst <- c(lijst, (matr[,x]))
+    lijst
+   }
+}  
 
 
 

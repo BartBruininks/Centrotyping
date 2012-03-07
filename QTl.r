@@ -13,32 +13,60 @@ getAdjustedProbes <- function(x){
  invisible(rr)
 }
 
- apply(cor(t(apply(aa[,17:196],2,as.numeric))),2,function(x){rownames(bb)[which(x> 0.6)]})
+apply(cor(t(apply(aa[,17:196],2,as.numeric))),2,function(x){rownames(bb)[which(x> 0.6)]})
 
-
+ 
 boxplot(all)
 
-## verwijder de verkeerde dag uit de data van het genotype en probematrix
+## verwijder de verkeerde dag uit de data van het genotype en de probematrix
+
+rawfaulty <- c(128, 130, 131, 132, 133, 134, 135, 137, 138, 139, 141, 142, 143, 144, 145)
+faulty <- strsplit("V128, V130, V131, V132, V133, V134, V135, V137, V138, V139, V141, V142, V143, V144, V145",", ")
+pool <- (9:172)
+samplev2 <- read.table("samplev2.txt")
+genotypes <- read.table("genotypes.txt")
+
+samples <- samplev2[grep("RIL",samplev2[,2]), ]
+torem <- which(as.character(samples[,1]) %in% unlist(faulty))
+samples <- samples[-torem,]
 
 newgenomatrix <- NULL
-for(x in samplev2[9:172,2]){
-  newgenomatrix <- rbind(newgenomatrix,genotypes[which(paste("RIL",genotypes[,1],sep="") == x),8:ncol(genotypes)])
+for(x in samples[,2]){
+  genrij <- which(paste("RIL",genotypes[,1],sep="") == x)
+  cat(x, genrij,"\n")
+  newgenomatrix <- rbind(newgenomatrix,genotypes[genrij,5:ncol(genotypes)])
 }
+rownames(newgenomatrix) <-  samples[,1]
 
-
-for(x in 1:100){
-	rawdata <- read.table(paste("chr1/",dir("chr1/")[x],sep=""))
-	#rawdata <- getAdjustedProbes(x)
-	nonfounders <- grep("RIL",samplev2[,2])
-	probes <- rawdata[,17:196][,nonfounders]
-
-	mm <- NULL
-	for(t in 1:nrow(probes)){
-		pvals <- NULL
-		for(x in 1:ncol(newgenomatrix)){
-		 pvals <- c(pvals, anova(lm(unlist(probes[t,]) ~ newgenomatrix[,x]))[[5]][1])
+Centrotype <- function(myrange = c(1 : length(dir("chr1/")))){
+	res <- vector("list",length(myrange))
+  cnt <- 1
+  for(x in myrange){
+		TijdA <-proc.time()
+		rawdata <- read.table(paste("chr1/",dir("chr1/")[x],sep=""))
+		#rawdata <- getAdjustedProbes(x)
+		probes <- rawdata[,  rownames(newgenomatrix)]
+		mm <- NULL
+		for(p in 1:nrow(probes)){
+			pvals <- NULL
+			for(ele in 1:ncol(newgenomatrix)){
+			 pvals <- c(pvals, anova(lm(unlist(probes[p,]) ~ newgenomatrix[,ele]))[[5]][1])
+			}
+			mm <- rbind(mm, pvals)
 		}
-		mm <- rbind(mm, pvals)
+    name = strsplit(dir("chr1/")[x], "[.]")[[1]][1]
+		#jpeg(filename = paste("regulatie", name, ".jpeg", sep=""), width = 1000, height = 1000, bg = "white", units = "px")
+    heatmap(apply(-log10(mm) > 3.5,2,as.numeric),col=c("white","black"))
+    #dev.off()
+		cat(name, paste(" Took:", (proc.time()-TijdA)[3], "seconds", sep=" "), "\n")
+    res[[cnt]] <- mm
+    cnt <- cnt + 1
 	}
-	heatmap(apply(-log10(mm) > 3.5,2,as.numeric),col=c("white","black"))
+	invisible(res)
 }
+
+name = strsplit(dir("chr/1"[x]), "[.]")
+
+
+
+

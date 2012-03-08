@@ -19,6 +19,7 @@ apply(cor(t(apply(aa[,17:196],2,as.numeric))),2,function(x){rownames(bb)[which(x
 boxplot(all)
 
 ## verwijder de verkeerde dag uit de data van het genotype en de probematrix
+setwd("C:\\Users\\Bart\\Desktop\\Leren Programmeren\\Centrotype")
 
 rawfaulty <- c(128, 130, 131, 132, 133, 134, 135, 137, 138, 139, 141, 142, 143, 144, 145)
 faulty <- strsplit("V128, V130, V131, V132, V133, V134, V135, V137, V138, V139, V141, V142, V143, V144, V145",", ")
@@ -37,6 +38,10 @@ for(x in samples[,2]){
   newgenomatrix <- rbind(newgenomatrix,genotypes[genrij,5:ncol(genotypes)])
 }
 rownames(newgenomatrix) <-  samples[,1]
+
+ok_function <- function(m){
+  any(apply(apply(-log10(m) > 3.5,2,as.numeric),2,sum) >= 3) 
+}
 
 Centrotype <- function(myrange = c(1 : length(dir("chr1/")))){
 	res <- vector("list",length(myrange))
@@ -57,35 +62,55 @@ Centrotype <- function(myrange = c(1 : length(dir("chr1/")))){
       }
       name = strsplit(dir("chr1/")[x], "[.]")[[1]][1]
       #jpeg(filename = paste("regulatie", name, ".jpeg", sep=""), width = 1000, height = 1000, bg = "white", units = "px")
-      heatmap(apply(-log10(mm) > 3.5,2,as.numeric),col=c("white","black"))
+      heatmap(apply(-log10(mm) > 3.5,2,as.numeric),col=c("white","black"), scale="none")
       #dev.off()
       cat(name, paste(" Took:", (proc.time()-TijdA)[3], "seconds", sep=" "), "\n")
       res[[cnt]]$name <- x
       res[[cnt]]$mmatrix <- mm
       res[[cnt]]$ok <- ok_function(mm)
-    }
+    }else{
+	  res[[cnt]]$name <- x
+      res[[cnt]]$mmatrix <- 0
+	  res[[cnt]]$ok <- FALSE
+	}
     cnt <- cnt + 1
 	}
 	invisible(res)
 }
 
-ok_function <- function(m){
-  any(apply(apply(-log10(m) > 3.5,2,as.numeric),2,sum) >= 3) 
+
+#om een lijst uit te lezen op een naam:
+# unlist(lapply(<lijst>,"[","<name>"))
+
+#Manier van lijst maken die nodig is om de data van een Centrotype in te stoppen
+myrange <- 1:10
+namen <- NULL
+cnt <- 1
+Basiclist <- vector("list", length(myrange))
+for(x in myrange){
+	output1 <- x^3
+	output2 <- x+4
+	output3 <- x+5
+	output4 <- x+6
+	output5 <- matrix((1:20)+x, ncol=5, nrow=4)
+	Basiclist[[cnt]]$Macht <- output1
+	Basiclist[[cnt]]$Lineair[1] <- output2
+	Basiclist[[cnt]]$Lineair[2] <- output3
+	Basiclist[[cnt]]$Lineair[3] <- output4
+	Basiclist[[cnt]]$Matrix <- output5
+	namen <- c(namen, paste("Gen", x, sep=""))
+	cat(namen, "\n")
+	cnt <- cnt+1
 }
+names(Basiclist) <- namen
 
- unlist(lapply(aa,"[","name"))
+#Gevonden Centrotypes
+#> Centrotypes1...200 <- which(unlist(lapply(SUPERLIJST,"[","ok")))
+#> Centrotypes1...200
+# ok  ok  ok  ok  ok  ok  ok  ok  ok  ok  ok  ok  ok 
+# 17  31  86 104 108 136 137 138 145 176 179 185 191 
 
-# Krijg deze manier van een kolom uitrekenen en in een lijst zetten in de functie van Centrotype #
-rij <- 1:20 
-lijst <- NULL
-matr <- matrix(rij, ncol=10, nrow=2)
-for(x in 1:ncol(matr)){
-  if(sum(matr[,x]) >= 15){
-    lijst <- c(lijst, (matr[,x]))
-    lijst
-   }
-}  
-
-
-
-
+print.hotjeknor <- function(x){
+  cat("Results for ",length(x),"Genes\n")
+  cat("Has ",length(which(unlist(lapply(x,"[","ok")))),"centrotypes")
+}

@@ -1,6 +1,8 @@
-#### Nomgaals quality control ####
+# \file Basic quality control
+#  Do basic quality control on RNA expression data
+# (c) 2012 - Bart Bruininks, written in the [R] language
 
-# maak een matrix met 180 random rows uit 180 random genen op chr1
+#maak een matrix met 180 random rows uit 180 random genen op chr1
 #colRemoval is specific for our case in which we dont want columns 1 to 16
 BQC = function(x, directory = "chr1/", colRemoval = c(1:16)){
 	if(missing(x)) stop("Please specify a number of rows!")

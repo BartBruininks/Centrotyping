@@ -65,11 +65,11 @@ Centrotype <- function(myrange = c(1 : length(dir("chr1/")))){
       heatmap(apply(-log10(mm) > 3.5,2,as.numeric),col=c("white","black"), scale="none")
       #dev.off()
       cat(name, paste(" Took:", (proc.time()-TijdA)[3], "seconds", sep=" "), "\n")
-      res[[cnt]]$name <- unlist(strsplit(dir("chr1/")[x], ".txt")[1])
+      res[[cnt]]$name <- name
       res[[cnt]]$mmatrix <- mm
       res[[cnt]]$ok <- ok_function(mm)
     }else{
-	  res[[cnt]]$name <- unlist(strsplit(dir("chr1/")[x], ".txt")[1])
+	  res[[cnt]]$name <- name
       res[[cnt]]$mmatrix <- 0
 	  res[[cnt]]$ok <- FALSE
 	}
@@ -78,10 +78,28 @@ Centrotype <- function(myrange = c(1 : length(dir("chr1/")))){
 	invisible(res)
 }
 
+# Write the file 
+save(myList, file="test1.bin") 
+
+# Reload the data, under the same name, 'myList' 
+load(file="test1.bin") 
 
 #om een lijst uit te lezen op een naam:
 # unlist(lapply(<lijst>,"[","<name>"))
+lijst
+for(ele in 1:69){
+  if(ss[ele] == 1){ cat(ele, "juist", "\n")}
+}
 
+#Om je 0 en 1 waarden uit te lezen, dit kan ook in een matrix gezet worden met ncol= 69 en nrow is de hoeveelheid probes uit dd
+ cc<-apply(-log10(as.matrix(unlist(dd), ncol=96, nrow= 20)) > 3.5,2, as.numeric)
+ 
+ sCentrotype <- function(pvalmatrix){
+	matrixCor<- matrix(apply(-log10(as.matrix(unlist(pvalmatrix))) > 3.5,2, as.numeric), ncol=69)
+	apply(matrixCor, 2,  sum)
+	
+}
+ 
 #Manier van lijst maken die nodig is om de data van een Centrotype in te stoppen
 myrange <- 1:10
 namen <- NULL

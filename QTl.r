@@ -43,6 +43,13 @@ ok_function <- function(m){
   any(apply(apply(-log10(m) > 3.5,2,as.numeric),2,sum) >= 3) 
 }
 
+relatiefCentrotype <- function(mm){
+	matrixCor<- matrix(apply(-log10(as.matrix(unlist(mm))) > 3.5,2, as.numeric), ncol=69)
+	maxmarker <- which.max(apply(matrixCor, 2,  sum))
+	tempprobes <- which(matrixCor[,maxmarker] == 1)
+	output <- c("Marker:", maxmarker, "probes:", tempprobes)
+}
+
 Centrotype <- function(myrange = c(1 : length(dir("chr1/")))){
 	res <- vector("list",length(myrange))
   cnt <- 1
@@ -65,13 +72,15 @@ Centrotype <- function(myrange = c(1 : length(dir("chr1/")))){
       heatmap(apply(-log10(mm) > 3.5,2,as.numeric),col=c("white","black"), scale="none")
       #dev.off()
       cat(name, paste(" Took:", (proc.time()-TijdA)[3], "seconds", sep=" "), "\n")
-      res[[cnt]]$name <- name
-      res[[cnt]]$mmatrix <- mm
-      res[[cnt]]$ok <- ok_function(mm)
+      res[[cnt]]$Name <- name
+      res[[cnt]]$Matrix <- mm
+      res[[cnt]]$Ok <- ok_function(mm)
+	  res[[cnt]]$Centrotype <- relatiefCentrotype(mm)
     }else{
-	  res[[cnt]]$name <- name
-      res[[cnt]]$mmatrix <- 0
-	  res[[cnt]]$ok <- FALSE
+	  res[[cnt]]$Name <- name
+      res[[cnt]]$Matrix <- 0
+	  res[[cnt]]$Ok <- FALSE
+	  res[[cnt]]$Centrotype <- FALSE
 	}
     cnt <- cnt + 1
 	}
@@ -94,10 +103,11 @@ for(ele in 1:69){
 #Om je 0 en 1 waarden uit te lezen, dit kan ook in een matrix gezet worden met ncol= 69 en nrow is de hoeveelheid probes uit dd
  cc<-apply(-log10(as.matrix(unlist(dd), ncol=96, nrow= 20)) > 3.5,2, as.numeric)
  
- sCentrotype <- function(pvalmatrix){
-	matrixCor<- matrix(apply(-log10(as.matrix(unlist(pvalmatrix))) > 3.5,2, as.numeric), ncol=69)
-	apply(matrixCor, 2,  sum)
-	
+ relatiefCentrotype <- function(pvalmatrix, x){
+	matrixCor<- matrix(apply(-log10(as.matrix(unlist(pvalmatrix[[1]]$mmatrix))) > 3.5,2, as.numeric), ncol=69)
+	maxmarker <- which.max(apply(matrixCor, 2,  sum))
+	tempprobes <- which(matrixCor[,maxmarker] == 1)
+	output <- c("Marker:", maxmarker, "probes:", tempprobes)
 }
  
 #Manier van lijst maken die nodig is om de data van een Centrotype in te stoppen

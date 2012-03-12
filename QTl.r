@@ -27,9 +27,11 @@ pool <- (9:172)
 samplev2 <- read.table("samplev2.txt")
 genotypes <- read.table("genotypes.txt")
 
+
 samples <- samplev2[grep("RIL",samplev2[,2]), ]
 torem <- which(as.character(samples[,1]) %in% unlist(faulty))
 samples <- samples[-torem,]
+
 
 newgenomatrix <- NULL
 for(x in samples[,2]){
@@ -39,9 +41,11 @@ for(x in samples[,2]){
 }
 rownames(newgenomatrix) <-  samples[,1]
 
+
 ok_function <- function(m){
   any(apply(apply(-log10(m) > 3.5,2,as.numeric),2,sum) >= 3) 
 }
+
 
 relatiefCentrotype <- function(mm){
 	matrixCor<- matrix(apply(-log10(as.matrix(unlist(mm))) > 3.5,2, as.numeric), ncol=69)
@@ -50,8 +54,9 @@ relatiefCentrotype <- function(mm){
 	output <- c("Marker:", maxmarker, "probes:", tempprobes)
 }
 
-Centrotype <- function(myrange = c(1 : length(dir("chr1/")))){
-	res <- vector("list",length(myrange))
+
+Centrotype <- function(myrange = c(1 : length(dir("chr1/"))), enablematrix = FALSE){
+  res <- vector("list",length(myrange))
   cnt <- 1
   for(x in myrange){
 		TijdA <-proc.time()
@@ -72,20 +77,33 @@ Centrotype <- function(myrange = c(1 : length(dir("chr1/")))){
       heatmap(apply(-log10(mm) > 3.5,2,as.numeric),col=c("white","black"), scale="none")
       #dev.off()
       cat(name, paste(" Took:", (proc.time()-TijdA)[3], "seconds", sep=" "), "\n")
-      res[[cnt]]$Name <- name
-      res[[cnt]]$Matrix <- mm
-      res[[cnt]]$Ok <- ok_function(mm)
-	  res[[cnt]]$Centrotype <- relatiefCentrotype(mm)
+		if(enablematrix == TRUE){
+			res[[cnt]]$Matrix <- mm
+			res[[cnt]]$Name <- name
+			res[[cnt]]$Ok <- ok_function(mm)
+			if(res[[cnt]]$Ok == FALSE){
+			res[[cnt]]$Centrotype <- FALSE
+			}else{
+			res[[cnt]]$Centrotype <-relatiefCentrotype(mm)}
+		}else{
+			res[[cnt]]$Name <- name
+			res[[cnt]]$Ok <- ok_function(mm)
+			if(res[[cnt]]$Ok == FALSE){
+			res[[cnt]]$Centrotype <- FALSE
+			}else{
+			res[[cnt]]$Centrotype <-relatiefCentrotype(mm)}
+		}
     }else{
+	  res[[cnt]]$Matrix <- "EMPTY"
 	  res[[cnt]]$Name <- name
-      res[[cnt]]$Matrix <- 0
-	  res[[cnt]]$Ok <- FALSE
+      res[[cnt]]$Ok <- FALSE
 	  res[[cnt]]$Centrotype <- FALSE
 	}
     cnt <- cnt + 1
 	}
 	invisible(res)
 }
+
 
 # Write the file 
 save(myList, file="test1.bin") 

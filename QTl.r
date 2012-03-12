@@ -65,11 +65,11 @@ Centrotype <- function(myrange = c(1 : length(dir("chr1/")))){
       heatmap(apply(-log10(mm) > 3.5,2,as.numeric),col=c("white","black"), scale="none")
       #dev.off()
       cat(name, paste(" Took:", (proc.time()-TijdA)[3], "seconds", sep=" "), "\n")
-      res[[cnt]]$name <- x
+      res[[cnt]]$name <- unlist(strsplit(dir("chr1/")[x], ".txt")[1])
       res[[cnt]]$mmatrix <- mm
       res[[cnt]]$ok <- ok_function(mm)
     }else{
-	  res[[cnt]]$name <- x
+	  res[[cnt]]$name <- unlist(strsplit(dir("chr1/")[x], ".txt")[1])
       res[[cnt]]$mmatrix <- 0
 	  res[[cnt]]$ok <- FALSE
 	}
@@ -111,6 +111,6 @@ names(Basiclist) <- namen
 # 17  31  86 104 108 136 137 138 145 176 179 185 191 
 
 print.hotjeknor <- function(x){
-  cat("Results for ",length(x),"Genes\n")
-  cat("Has ",length(which(unlist(lapply(x,"[","ok")))),"centrotypes")
+  cat("Results for ",length(x),"Genes")
+  cat("Has ",length(which(unlist(lapply(x,"[","ok")))),"c")
 }

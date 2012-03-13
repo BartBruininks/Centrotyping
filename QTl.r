@@ -1,3 +1,6 @@
+#(c) Bart Bruininks written in the [R] language
+# 12-03-2012
+# Centrotyping Probes
 
 #getAdjustedProbes <- function(x){
 # dd <- read.table(paste("chr1/",dir("chr1/")[x],sep=""))
@@ -113,6 +116,31 @@ Centrotype <- function(myrange = c(1 : length(dir("chr1/"))), enablematrix = FAL
 	invisible(res)
 }
 
+readCentrotypes <- function(x = "Centrotypes.txt"){
+  filein <- file(x, "rt") #rt zorgt ervoor dat ik mijn file open laat staan terwijl ik hem lees
+  nline <- readLines(filein, n=1,)
+  s <- proc.time()
+  splitit <- NULL
+  namez <- NULL
+  cnt <- 1
+  while(length(nline)){
+    elementen <- strsplit(nline, "\t")
+    splitit <- c(splitit, elementen)
+	splitit[[cnt]] <- splitit[[cnt]][-c(1)]
+	namez <- c(namez, elementen[[1]][1])
+	nline <- readLines(filein, n=1)
+	cnt <- cnt+1
+  }
+  e <- proc.time()
+  cat(e[3]-s[3], "seconds\n")
+  close(filein)
+  names(splitit) <- paste("", namez, sep="")
+  invisible(splitit)
+}
+
+
+
+
 #write(x, file = "data",
 #      ncolumns = if(is.character(x)) 1 else 5,
 #      append = FALSE, sep = " ")
@@ -125,7 +153,7 @@ Centrotype <- function(myrange = c(1 : length(dir("chr1/"))), enablematrix = FAL
 #load(file="test1.bin") 
 
 #om een lijst uit te lezen op een naam:
-# unlist(lapply(<lijst>,"[","<name>"))
+#
 #lijst
 #for(ele in 1:69){
 #  if(ss[ele] == 1){ cat(ele, "juist", "\n")}
@@ -163,6 +191,13 @@ Centrotype <- function(myrange = c(1 : length(dir("chr1/"))), enablematrix = FAL
 #}
 #names(Basiclist) <- namen
 
+which(!unlist(lapply(Cent,"[",1))=="FALSE")
+which(unlist(lapply(Cent,"[",1))=="FALSE")
+
+which(lapply(Cent,length)==1)
+which(lapply(Cent,length)!=1)
+
+
 #Gevonden Centrotypes
 #> Centrotypes1...200 <- which(unlist(lapply(SUPERLIJST,"[","ok")))
 #> Centrotypes1...200
@@ -173,5 +208,8 @@ Centrotype <- function(myrange = c(1 : length(dir("chr1/"))), enablematrix = FAL
 #  cat("Results for ",length(x),"Genes")
 #  cat("Has ",length(which(unlist(lapply(x,"[","ok")))),"c")
 #}
+
+
+
 
 

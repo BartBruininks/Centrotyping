@@ -210,8 +210,11 @@ which(lapply(Cent,length)!=1)
 #}
 
 # Kijken welk type centrotyping meer oplevert
+
 PowerLevel <- function(x){
-	Goten <- readCentrotypes(paste(x, ".txt", sep=""))
+	cat("Vegeta, what does the scouter say about his powerlevel?", "\n")
+	Sys.sleep(2)
+	Goten <- invisible(readCentrotypes(paste(x, ".txt", sep="")))
 	Trunks <- which(lapply(Goten,length)!=1)
 	Gotenks <- Goten[Trunks]
 	SsjGotenks <- NULL
@@ -219,14 +222,31 @@ PowerLevel <- function(x){
 		SsjGotenks <- c(SsjGotenks, Gotenks[[Dragonball]][-c(1:3)])
 	}
 	powerlevel <- length(SsjGotenks)
-	cat(powerlevel)
-	if(powerlevel > 9){cat("\n", "OVER 9.000!?!?!?", "\n")}
+	print(powerlevel)
+	
+	Sys.sleep(1)
+	if(powerlevel > 9){cat("\n","\n", "OVER 9.000!?!?!?", "\n", "\n", "\n")}
 	invisible(powerlevel)
 }
-# adjusted   = pwrlvl 1914
-# unadjusted = pwrlvl 1834
+
+# unadjusted   = pwrlvl 1914
+# adjusted = pwrlvl 1834
 # Conclusie: de unadjusted zal worden gebruikt, puur voor het hebben van een voorbeeld dat nog een beetje ergens op lijkt!!
 
+
+OnlyCent <- function(x){
+	Goten <- invisible(readCentrotypes(paste(x, ".txt", sep="")))
+	Trunks <- which(lapply(Goten,length)!=1)
+	Gotenks <- Goten[Trunks]
+}
+
+Centrotype_unadjusted <- OnlyCent("Centrotype_unadjusted")
+
+preCentrotype <- function(x){
+	varA <- Centrotype_unadjusted[[x]][-c(1:3)]
+	varB <- read.table(paste("chr1/", x, ".txt", sep=""))
+	varC <- varB[as.numeric(varA),]
+}
 
 
 

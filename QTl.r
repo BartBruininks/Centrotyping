@@ -2,19 +2,19 @@
 # 12-03-2012
 # Centrotyping Probes
 
-#getAdjustedProbes <- function(x){
-# dd <- read.table(paste("chr1/",dir("chr1/")[x],sep=""))
-# rr <- NULL
-# for(y in 1:nrow(dd)){
-#    pval <- anova(lm(t(dd[y,17:196]) ~ samplev2[,3]))[[5]][1]
-#	if(-log10(pval) > 3){
-#	  rr <- rbind(rr,c(dd[y,1:16],residuals(lm(t(dd[y,17:196]) ~ samplev2[,3]))))
-#	}else{
-#	  rr <- rbind(rr,c(dd[y,1:16],dd[y,17:196]))
-#	}
-# }
-# invisible(rr)
-#}
+getAdjustedProbes <- function(x){
+ dd <- read.table(paste("chr1/",dir("chr1/")[x],sep=""))
+ rr <- NULL
+ for(y in 1:nrow(dd)){
+    pval <- anova(lm(t(dd[y,17:196]) ~ samplev2[,3]))[[5]][1]
+	if(-log10(pval) > 3){
+	  rr <- rbind(rr,c(dd[y,1:16],residuals(lm(t(dd[y,17:196]) ~ samplev2[,3]))))
+	}else{
+	  rr <- rbind(rr,c(dd[y,1:16],dd[y,17:196]))
+	}
+ }
+ invisible(rr)
+}
 
 #apply(cor(t(apply(aa[,17:196],2,as.numeric))),2,function(x){rownames(bb)[which(x> 0.6)]})
 
@@ -66,8 +66,8 @@ Centrotype <- function(myrange = c(1 : length(dir("chr1/"))), enablematrix = FAL
   cnt <- 1
   for(x in myrange){
 		TijdA <-proc.time()
-		rawdata <- read.table(paste("chr1/",dir("chr1/")[x],sep=""))
-		#rawdata <- getAdjustedProbes(x)
+		rawdata <- read.table(paste("chr1/",dir("chr1/")[x],sep=""))							#Waarden met omgevingsverschil
+		#rawdata <- getAdjustedProbes(x)															#Waarden zonder omgevingsverschil
 		probes <- rawdata[,  rownames(newgenomatrix)]
     if(nrow(probes) >= 2){
       #mm <- NULL
@@ -208,6 +208,24 @@ which(lapply(Cent,length)!=1)
 #  cat("Results for ",length(x),"Genes")
 #  cat("Has ",length(which(unlist(lapply(x,"[","ok")))),"c")
 #}
+
+# Kijken welk type centrotyping meer oplevert
+PowerLevel <- function(x){
+	Goten <- readCentrotypes(paste(x, ".txt", sep=""))
+	Trunks <- which(lapply(Goten,length)!=1)
+	Gotenks <- Goten[Trunks]
+	SsjGotenks <- NULL
+	for(Dragonball in 1:length(Gotenks)){
+		SsjGotenks <- c(SsjGotenks, Gotenks[[Dragonball]][-c(1:3)])
+	}
+	powerlevel <- length(SsjGotenks)
+	cat(powerlevel)
+	if(powerlevel > 9){cat("\n", "OVER 9.000!?!?!?", "\n")}
+	invisible(powerlevel)
+}
+# adjusted   = pwrlvl 1914
+# unadjusted = pwrlvl 1834
+# Conclusie: de unadjusted zal worden gebruikt, puur voor het hebben van een voorbeeld dat nog een beetje ergens op lijkt!!
 
 
 

@@ -251,8 +251,17 @@ preCentrotype <- function(x){
 	varB <- read.table(paste("chr1/", x, ".txt", sep=""))	#
 	varC <- varB[as.numeric(varA),]
 	varD <- apply(varC[goodind], 2, mean)
+	output <- c(x, Centrotype_unadjusted[[x]][2], varD)
 }
-nummers <- 1:9
-Matrix <- matrix(nummers, ncol=3, nrow=3)
-Mean <- apply(Matrix, 2, mean)
+
+CentrotypeMatrix <- function(x = 1:length(Centrotype_unadjusted)){
+	vectorcentrotype <- NULL
+	for(ele in x){
+		gennaam <- names(Centrotype_unadjusted[ele])
+		enkelcentrotype <- preCentrotype(gennaam)
+		vectorcentrotype <- c(vectorcentrotype, enkelcentrotype)
+		cat(gennaam, "\n")
+	}
+	Centrotypematrix <- matrix(vectorcentrotype, nrow=167, ncol=length(Centrotype_unadjusted))
+}
 

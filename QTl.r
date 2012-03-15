@@ -28,14 +28,18 @@ setwd("C:\\Users\\Bart\\Desktop\\Leren Programmeren\\Centrotype")
 #setwd("C:\\Users\\Students\\Desktop\\Hoofdmap")								# pathway voor de server!!!
 
 rawfaulty <- c(128, 130, 131, 132, 133, 134, 135, 137, 138, 139, 141, 142, 143, 144, 145)
-faulty <- strsplit("V128, V130, V131, V132, V133, V134, V135, V137, V138, V139, V141, V142, V143, V144, V145",", ")
+faulty <- unlist(strsplit("V128, V130, V131, V132, V133, V134, V135, V137, V138, V139, V141, V142, V143, V144, V145",", "))
+ind <- paste("V", 1:180, sep="")
+goodind <- ind[-rawfaulty]
+
+
 pool <- (9:172)
 samplev2 <- read.table("samplev2.txt")
 genotypes <- read.table("genotypes.txt")
 
 
 samples <- samplev2[grep("RIL",samplev2[,2]), ]
-torem <- which(as.character(samples[,1]) %in% unlist(faulty))
+torem <- which(as.character(samples[,1]) %in% faulty)
 samples <- samples[-torem,]
 
 
@@ -243,11 +247,12 @@ OnlyCent <- function(x){
 Centrotype_unadjusted <- OnlyCent("Centrotype_unadjusted")
 
 preCentrotype <- function(x){
-	varA <- Centrotype_unadjusted[[x]][-c(1:3)]
-	varB <- read.table(paste("chr1/", x, ".txt", sep=""))
+	varA <- Centrotype_unadjusted[[x]][-c(1:3)]				#Inlezen van een centrotype
+	varB <- read.table(paste("chr1/", x, ".txt", sep=""))	#
 	varC <- varB[as.numeric(varA),]
+	varD <- apply(varC[goodind], 2, mean)
 }
-
-
-
+nummers <- 1:9
+Matrix <- matrix(nummers, ncol=3, nrow=3)
+Mean <- apply(Matrix, 2, mean)
 

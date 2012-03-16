@@ -70,7 +70,7 @@ Centrotype <- function(myrange = c(1 : length(dir("chr1/"))), enablematrix = FAL
   cnt <- 1
   for(x in myrange){
 		TijdA <-proc.time()
-		rawdata <- read.table(paste("chr1/",dir("chr1/")[x],sep=""))							#Waarden met omgevingsverschil
+		rawdata <- read.table(paste("chr1/",dir("chr1/")[x],sep=""))								#Waarden met omgevingsverschil
 		#rawdata <- getAdjustedProbes(x)															#Waarden zonder omgevingsverschil
 		probes <- rawdata[,  rownames(newgenomatrix)]
     if(nrow(probes) >= 2){
@@ -246,20 +246,28 @@ OnlyCent <- function(x){
 
 Centrotype_unadjusted <- OnlyCent("Centrotype_unadjusted")
 
+####################################
 preCentrotype <- function(x){
-	varA <- Centrotype_unadjusted[[x]][-c(1:3)]				#Inlezen van een centrotype
-	varB <- read.table(paste("chr1/", x, ".txt", sep=""))	#
-	varC <- varB[as.numeric(varA),]
-	varD <- apply(varC[goodind], 2, mean)
-	output <- c(x, Centrotype_unadjusted[[x]][2], varD)
+	varA <- Centrotype_unadjusted[[x]][-c(1:3)]				#inlezen van de probes
+	varB <- read.table(paste("chr1/", x, ".txt", sep=""))	#inlezen van de dataset
+	varC <- varB[as.numeric(varA),]							#alleen de data van de gewenste probes
+	varD <- apply(varC[goodind], 2, mean)					#mean per ind van de probes
+	output <- c(x, Centrotype_unadjusted[[x]][2], varD)		#output in: gennaam, marker, ind mean expression
 }
 
-CentrotypeMatrix <- function(x = 1:length(Centrotype_unadjusted)){
+preProbes <- function(x){
+	varB <- read.table(paste("chr1/", x, ".txt", sep=""))	#inlezen van de dataset
+	varD <- apply(varB[goodind], 2, mean)					#mean per ind van de probes
+	output <- c(x, Centrotype_unadjusted[[x]][2], varD)		#output in: gennaam, marker, ind mean expression
+}	
+####################################
+
+CentrotypeMatrix <- function(x = 1:length(Centrotype_unadjusted), y = preCentrotype){
 	vectorcentrotype <- NULL
 	colnamen <- NULL
 	for(ele in x){
 		gennaam <- names(Centrotype_unadjusted[ele])
-		enkelcentrotype <- preCentrotype(gennaam)
+		enkelcentrotype <- y(gennaam)
 		vectorcentrotype <- c(vectorcentrotype, enkelcentrotype)
 		cat(gennaam, "\n")
 		colnamen <- c(colnamen, gennaam)
@@ -269,15 +277,16 @@ CentrotypeMatrix <- function(x = 1:length(Centrotype_unadjusted)){
 	Centrotypematrix
 }
 
-centrotype_matrix <- CentrotypeMatrix()
+centrotype_matrix 	<- CentrotypeMatrix()
+probes_matrix		<- CentrotypeMatrix(, preProbes)
 samplev2 <- read.table("samplev2.txt")
 rawEnvirement <- as.numeric(samplev2[,3])		# 1 = 6H, 2 = Dry_AR, 3 = Dry_FRESH, 4 = RP 
 Envirement <- rawEnvirement[-c(rawfaulty)]
 
 ##### ANOVA test #####
-UltimateCentrotype <- function(){
+UltimateCentrotypeMatrix <- function(x = centrotype_matrix){
 mm <- NULL
-centroidprobes <- as.matrix(apply(centrotype_matrix[11:159,],2,as.numeric))
+centroidprobes <- as.matrix(apply(x[11:159,],2,as.numeric))
 tijdA <- proc.time()[3]
 vals <- NULL
 mm <- apply(newgenomatrix,2,function(marker){
@@ -286,13 +295,26 @@ mm <- apply(newgenomatrix,2,function(marker){
 tijdB <- proc.time()[3]
 cat("Took:", tijdB-tijdA, "seconds", "\n", sep=" ")
 colnames(mm) <- paste("Marker", 1:69, sep="")
-rownames(mm) <- colnames(centrotype_matrix) 
+rownames(mm) <- colnames(x) 
 mm
 }
 #####################
 
+ulTimatecentRotypEmatriX <- UltimateCentrotypeMatrix()
+TREX <- -log10(ulTimatecentRotypEmatriX)
 
-image(t(-log10(mm)),breaks=c(0,3,10,1000),col=c("white","blue","black"))
+UltimateProbeMatrix <- UltimateCentrotypeMatrix(probes_matrix)
+UPM <- -log10(UltimateProbeMatrix)
+            
+######################################################################
+###################### Geniet en bewonder!!! #########################
+######################################################################
+
+for(ele in 1:length(TREX)){
+	plot(TREX[ele,], type="l",col="green")
+	points(UPM[ele,], type="l", col="red")
+	Sys.sleep(2)
+}
 
 
 

@@ -265,3 +265,58 @@ CentrotypeMatrix <- function(x = 1:length(Centrotype_unadjusted)){
 	Centrotypematrix <- matrix(vectorcentrotype, nrow=167, ncol=length(Centrotype_unadjusted))
 }
 
+centrotype_matrix <- CentrotypeMatrix()
+samplev2 <- read.table("samplev2.txt")
+rawEnvirement <- as.numeric(samplev2[,3])		# 1 = 6H, 2 = Dry_AR, 3 = Dry_FRESH, 4 = RP 
+Envirement <- rawEnvirement[-c(rawfaulty)]
+
+
+mm <- NULL
+centroidprobes <- as.matrix(apply(centrotype_matrix[11:159,],2,as.numeric))
+tijdA <- proc.time()[3]
+vals <- NULL
+
+mm <- apply(newgenomatrix,2,function(marker){
+	unlist(lapply(summary(aov(centroidprobes ~ Envirement[9:157]+marker+Envirement[9:157]:marker)),"[",2,5))
+})
+tijdB <- proc.time()[3]
+cat("Took:", tijdB-tijdA, "seconds", "\n", sep=" ")
+
+
+#mm <- NULL
+#for(p in 1:nrow(probes)){
+#  pvals <- NULL
+#  for(ele in 1:ncol(newgenomatrix)){
+#   pvals <- c(pvals, anova(lm(unlist(probes[p,]) ~ newgenomatrix[,ele]))[[5]][1])
+#  }
+#  mm <- rbind(mm, pvals)
+#}
+
+probes <- as.matrix(t(apply(probes,2,as.numeric)))
+	  mm <- apply(newgenomatrix,2,function(m){
+	    unlist(lapply(summary(aov(probes ~ as.factor(m))),"[",1,5),use.names=TRUE)
+		}
+	  )
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

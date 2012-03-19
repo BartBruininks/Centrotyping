@@ -87,8 +87,9 @@ Centrotype <- function(myrange = c(1 : length(dir("chr1/"))), enablematrix = FAL
 	    unlist(lapply(summary(aov(probes ~ as.factor(m))),"[",1,5),use.names=TRUE)
 		}
 	  )
-      name = strsplit(dir("chr1/")[x], "[.]")[[1]][1]
-      #jpeg(filename = paste("regulatie", name, ".jpeg", sep=""), width = 1000, height = 1000, bg = "white", units = "px")
+	  name = strsplit(dir("chr1/")[x], "[.]")[[1]][1]
+      
+	  #jpeg(filename = paste("regulatie", name, ".jpeg", sep=""), width = 1000, height = 1000, bg = "white", units = "px")
       heatmap(apply(-log10(mm) > 3.5,2,as.numeric),col=c("white","black"), scale="none")
       #dev.off()
       cat(name, paste(" Took:", (proc.time()-TijdA)[3], "seconds", sep=" "), "\n")
@@ -255,11 +256,13 @@ preCentrotype <- function(x){
 	output <- c(x, Centrotype_unadjusted[[x]][2], varD)		#output in: gennaam, marker, ind mean expression
 }
 
-preProbes <- function(x){
+preMeanProbes <- function(x){
 	varB <- read.table(paste("chr1/", x, ".txt", sep=""))	#inlezen van de dataset
 	varD <- apply(varB[goodind], 2, mean)					#mean per ind van de probes
 	output <- c(x, Centrotype_unadjusted[[x]][2], varD)		#output in: gennaam, marker, ind mean expression
 }	
+
+
 
 
 ####################################
@@ -280,7 +283,7 @@ CentrotypeMatrix <- function(x = 1:length(Centrotype_unadjusted), y = preCentrot
 }
 
 centrotype_matrix 	<- CentrotypeMatrix()
-probes_matrix		<- CentrotypeMatrix(, preProbes)
+probes_matrix		<- CentrotypeMatrix(, preMeanProbes)
 samplev2 <- read.table("samplev2.txt")
 rawEnvirement <- as.numeric(samplev2[,3])		# 1 = 6H, 2 = Dry_AR, 3 = Dry_FRESH, 4 = RP 
 Envirement <- rawEnvirement[-c(rawfaulty)]

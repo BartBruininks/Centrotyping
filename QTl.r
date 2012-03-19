@@ -260,6 +260,8 @@ preProbes <- function(x){
 	varD <- apply(varB[goodind], 2, mean)					#mean per ind van de probes
 	output <- c(x, Centrotype_unadjusted[[x]][2], varD)		#output in: gennaam, marker, ind mean expression
 }	
+
+
 ####################################
 
 CentrotypeMatrix <- function(x = 1:length(Centrotype_unadjusted), y = preCentrotype){
@@ -305,16 +307,21 @@ TREX <- -log10(ulTimatecentRotypEmatriX)
 
 UltimateProbeMatrix <- UltimateCentrotypeMatrix(probes_matrix)
 UPM <- -log10(UltimateProbeMatrix)
-            
+
+       
 ######################################################################
 ###################### Geniet en bewonder!!! #########################
 ######################################################################
 
 for(ele in 1:length(TREX)){
-	plot(TREX[ele,], type="l",col="green")
+	plot(TREX[ele,], type="l",col="green", main = paste("Centrotype",
+	rownames(TREX)[ele], sep=" "), xlab= "Markers", ylab="-log10(pval)")
 	points(UPM[ele,], type="l", col="red")
+	legend("topright",c("Centrotype","Mean Probes"), col=c("green","red"),lwd=2)
 	Sys.sleep(2)
 }
+
+
 
 
 

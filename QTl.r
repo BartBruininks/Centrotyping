@@ -308,11 +308,60 @@ TREX <- -log10(ulTimatecentRotypEmatriX)
 UltimateProbeMatrix <- UltimateCentrotypeMatrix(probes_matrix)
 UPM <- -log10(UltimateProbeMatrix)
 
-       
+###########################################################################################
+########################      (c)Inne        ##############################################
+########################date created:8 maart ##############################################
+###########################################################################################
+
+
+data <- read.csv("BayShatraitsAll.csv", sep=";")
+chromos<- data[1,405:ncol(data)]
+Morgan<- data[2,405:ncol(data)]
+#plot grote
+
+plotInne <- function(yass1, yass2, M=Morgan, ch=chromos, gapsize=25,type='l',cuttoff=3,Title="Summarized QTL plot",Title_Y.as1="value of significant QTL"){
+
+
+#Getd bepaald de centimorgan afstand tussen de markers van één chromosoom
+getD <- function(which.chr=1,distances,chr){
+  distances[max(which(chr==which.chr))]
+}
+
+#GetCD bepaald de chromosoom distance en telt er een gap bij op
+getCD <- function(which.chr=1, gapsize = 25,distances,chr){
+  if(which.chr==0) return(0)
+  D <- 0
+  for(x in 1:which.chr){
+    D <- D + getD(x,distances,chr) + gapsize
+  }
+  return(D)
+}
+#hier worden plot parameters meegegeven
+  op <- par(las = 2)							#las is loodrechte x-aslabel notatie
+  op <- par(cex.axis = 0.6)						#De grootte van de labels
+  distances <- as.numeric(t(M[1,]))		#is de afstand van het totaal
+  chr <- as.numeric(unlist(t(ch)))			#Chr is welk chromosoom en de lengte ervan
+  nchr <-length(unique(chr))					#nchr is de lenget van alle chromosomen tot dusver
+  plot(c(0, getCD(nchr, gapsize=gapsize,distances=distances,chr=chr)),c(0,max(max(yass1), max(yass2))),type="n",main=Title, ylab=Title_Y.as1, xlab="Markers",xaxt="n")	#De algemene plot
+  legend("topright",c("Centrotype","Mean Probes"), col=c("green","red"),lwd=2)
+  axis(2, c(0,max(max(yass1),max(yass2))))		#De Y-as
+  locs <- NULL									#Locaties op de x-as
+  for(x in 1:nchr){								#De loop voor het plotten van je points
+    locs <- c(locs,distances[which(chr==x)] + (getCD(x-1,gapsize,distances,chr)))
+    points(x=distances[which(chr==x)] + (getCD(x-1,gapsize,distances,chr)),y=yass1[which(chr==x)],type=type,col="green",lwd=1)
+	points(x=distances[which(chr==x)] + (getCD(x-1,gapsize,distances,chr)),y=yass2[which(chr==x)],type=type,col="red",lwd=1)
+  }
+  abline(h=cuttoff, lty="dashed")				#de cut-off
+  axis(1,locs,labels=names(M[1,]))			#de x-as notatie
+}
+######################### EINDE INNE #################################
+
+
 ######################################################################
 ###################### Geniet en bewonder!!! #########################
 ######################################################################
 
+gaan <- function(){
 for(ele in 1:length(TREX)){
 	plot(TREX[ele,], type="l",col="green", main = paste("Centrotype",
 	rownames(TREX)[ele], sep=" "), xlab= "Markers", ylab="-log10(pval)")
@@ -320,27 +369,11 @@ for(ele in 1:length(TREX)){
 	legend("topright",c("Centrotype","Mean Probes"), col=c("green","red"),lwd=2)
 	Sys.sleep(2)
 }
+}
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+Baf <- function(){
+for(ele in 1:length(TREX)){
+	plotInne(yass1=as.numeric(TREX[ele,]), yass2=as.numeric(UPM[ele,]), Title=paste(rownames(TREX)[ele], "Centrotype vs Mean Probes", sep=" "))
+	Sys.sleep(2)
+}
+}

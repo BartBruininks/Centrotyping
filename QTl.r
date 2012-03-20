@@ -65,7 +65,7 @@ relatiefCentrotype <- function(mm){
 }
 
 
-Centrotype <- function(myrange = c(1 : length(dir("chr1/"))), enablematrix = FALSE){
+Centrotype <- function(myrange = c(1 : length(dir("chr1/"))), enablematrix = FALSE, enablefile = FALSE){
   res <- vector("list",length(myrange))
   cnt <- 1
   for(x in myrange){
@@ -87,10 +87,10 @@ Centrotype <- function(myrange = c(1 : length(dir("chr1/"))), enablematrix = FAL
 	    unlist(lapply(summary(aov(probes ~ as.factor(m))),"[",1,5),use.names=TRUE)
 		}
 	  )
-	  name = strsplit(dir("chr1/")[x], "[.]")[[1]][1]
-      
-	  #jpeg(filename = paste("regulatie", name, ".jpeg", sep=""), width = 1000, height = 1000, bg = "white", units = "px")
-      heatmap(apply(-log10(mm) > 3.5,2,as.numeric),col=c("white","black"), scale="none")
+	  name <- strsplit(dir("chr1/")[x], "[.]")[[1]][1]
+	  if(enablefile == TRUE){write.table(mm, file=paste(name, "LosseProbesAOV.txt", sep=""))}
+      #jpeg(filename = paste("regulatie", name, ".jpeg", sep=""), width = 1000, height = 1000, bg = "white", units = "px")
+      #heatmap(apply(-log10(mm) > 3.5,2,as.numeric),col=c("white","black"), scale="none")
       #dev.off()
       cat(name, paste(" Took:", (proc.time()-TijdA)[3], "seconds", sep=" "), "\n")
 		if(enablematrix == TRUE){
@@ -380,3 +380,11 @@ for(ele in 1:length(TREX)){
 	Sys.sleep(2)
 }
 }
+
+for(ele in 1:7606){
+	bestand <- read.table(paste(ele ,"LosseProbesAOV.txt", sep=""))
+	for(rij in 1:nrow(bestand)){
+		varA <- unlist(bestand[rij,])
+		cat(varA, "\n")
+	}
+}	

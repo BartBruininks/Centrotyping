@@ -322,7 +322,7 @@ chromos<- data[1,405:ncol(data)]
 Morgan<- data[2,405:ncol(data)]
 #plot grote
 
-plotInne <- function(yass1, yass2, M=Morgan, ch=chromos, gapsize=25,type='l',cuttoff=3,Title="Summarized QTL plot",Title_Y.as1="value of significant QTL"){
+plotInne <- function(gennummer , yass1, yass2, M=Morgan, ch=chromos, gapsize=25,type='l',cuttoff=3,Title="Summarized QTL plot",Title_Y.as1="value of significant QTL"){
 
 
 #Getd bepaald de centimorgan afstand tussen de markers van één chromosoom
@@ -349,10 +349,17 @@ getCD <- function(which.chr=1, gapsize = 25,distances,chr){
   legend("topright",c("Centrotype","Mean Probes"), col=c("green","red"),lwd=2)
   axis(2, c(0,max(max(yass1),max(yass2))))		#De Y-as
   locs <- NULL									#Locaties op de x-as
+  gennaam = rownames(TREX)[gennummer]
+  cat(gennaam, "\n")
+  prebestand <- read.table(paste("LossProbesAOV/", gennaam, "LosseProbesAOV",".txt", sep=""))
+  bestand <- -log10(prebestand)
   for(x in 1:nchr){								#De loop voor het plotten van je points
     locs <- c(locs,distances[which(chr==x)] + (getCD(x-1,gapsize,distances,chr)))
-    points(x=distances[which(chr==x)] + (getCD(x-1,gapsize,distances,chr)),y=yass1[which(chr==x)],type=type,col="green",lwd=1)
-	points(x=distances[which(chr==x)] + (getCD(x-1,gapsize,distances,chr)),y=yass2[which(chr==x)],type=type,col="red",lwd=1)
+    points(x=distances[which(chr==x)] + (getCD(x-1,gapsize,distances,chr)),y=yass1[which(chr==x)],type=type,col="green",lwd=3)
+	points(x=distances[which(chr==x)] + (getCD(x-1,gapsize,distances,chr)),y=yass2[which(chr==x)],type=type,col="red",lwd=3)
+	for(rij in 1:nrow(bestand)){
+		points(x=distances[which(chr==x)] + (getCD(x-1,gapsize, distances, chr)), y=bestand[rij,][which(chr==x)], type=type, col=(rij+5), lwd=1)
+	}
   }
   abline(h=cuttoff, lty="dashed")				#de cut-off
   axis(1,locs,labels=names(M[1,]))			#de x-as notatie
@@ -376,15 +383,11 @@ for(ele in 1:length(TREX)){
 
 Baf <- function(){
 for(ele in 1:length(TREX)){
-	plotInne(yass1=as.numeric(TREX[ele,]), yass2=as.numeric(UPM[ele,]), Title=paste(rownames(TREX)[ele], "Centrotype vs Mean Probes", sep=" "))
+	plotInne(gennummer= ele, yass1=as.numeric(TREX[ele,]), yass2=as.numeric(UPM[ele,]), Title=paste(rownames(TREX)[ele], "Centrotype vs Mean Probes", sep=" "))
 	Sys.sleep(2)
 }
 }
 
 for(ele in 1:7606){
-	bestand <- read.table(paste(ele ,"LosseProbesAOV.txt", sep=""))
-	for(rij in 1:nrow(bestand)){
-		varA <- unlist(bestand[rij,])
-		cat(varA, "\n")
-	}
+	bestand <- read.table(paste("LossProbesAOV/", dir("LossProbesAOV")[ele], sep=""))
 }	
